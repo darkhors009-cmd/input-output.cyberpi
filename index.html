@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>CyberPi: Inputs &amp; Outputs – Lesson 5: Microcontrollers</title>
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & THEME SYSTEM (Strict Color Coding: Input, Process, Output)
+       ========================================================================== */
+    :root {
+      /* Core Concept Colors - FIXED ACROSS ALL PHASES */
+      --color-input: #10b981;        /* Emerald Green */
+      --color-input-bg: rgba(16, 185, 129, 0.11);
+      --color-input-border: rgba(16, 185, 129, 0.45);
+      --color-input-text: #047857;
+      --color-input-glow: rgba(16, 185, 129, 0.35);
+
+      --color-output: #3b82f6;       /* Royal Blue */
+      --color-output-bg: rgba(59, 130, 246, 0.11);
+      --color-output-border: rgba(59, 130, 246, 0.45);
+      --color-output-text: #1d4ed8;
+      --color-output-glow: rgba(59, 130, 246, 0.35);
+
+      --color-process: #334155;      /* Neutral Slate Dark */
+      --color-process-bg: rgba(51, 65, 85, 0.1);
+      --color-process-border: rgba(100, 116, 139, 0.4);
+      --color-process-text: #1e293b;
+
+      /* Theme 1: Daylight Studio (Default Light) */
+      --bg-app: #f1f5f9;
+      --bg-gradient: radial-gradient(circle at 12% 10%, rgba(16, 185, 129, 0.08), transparent 42%),
+                     radial-gradient(circle at 88% 15%, rgba(59, 130, 246, 0.09), transparent 45%),
+                     linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --bg-card-solid: #ffffff;
+      --bg-subtle: rgba(241, 245, 249, 0.9);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-subtle: rgba(203, 213, 225, 0.75);
+      --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 22px 48px rgba(15, 23, 42, 0.14);
+      --accent-primary: #6366f1;
+      --accent-primary-hover: #4f46e5;
+      --takeaway-bg: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+      --takeaway-border: #facc15;
+      --takeaway-text: #854d0e;
+      --danger: #ef4444;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    /* Theme 2: Cyber Midnight (Dark Neon) */
+    [data-theme="dark"] {
+      --color-input: #10b981;
+      --color-input-bg: rgba(16, 185, 129, 0.16);
+      --color-input-border: rgba(16, 185, 129, 0.5);
+      --color-input-text: #6ee7b7;
+
+      --color-output: #3b82f6;
+      --color-output-bg: rgba(59, 130, 246, 0.18);
+      --color-output-border: rgba(59, 130, 246, 0.5);
+      --color-output-text: #93c5fd;
+
+      --color-process: #475569;
+      --color-process-bg: rgba(71, 85, 105, 0.3);
+      --color-process-border: rgba(148, 163, 184, 0.38);
+      --color-process-text: #e2e8f0;
+
+      --bg-app: #070b14;
+      --bg-gradient: radial-gradient(circle at 15% 12%, rgba(16, 185, 129, 0.14), transparent 45%),
+                     radial-gradient(circle at 85% 18%, rgba(59, 130, 246, 0.16), transparent 48%),
+                     linear-gradient(180deg, #070b14 0%, #0f172a 100%);
+      --bg-card: rgba(19, 28, 49, 0.85);
+      --bg-card-solid: #131c31;
+      --bg-subtle: rgba(30, 41, 59, 0.85);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-subtle: rgba(51, 65, 85, 0.75);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.55);
+      --shadow-lg: 0 24px 52px rgba(0, 0, 0, 0.7);
+      --accent-primary: #818cf8;
+      --accent-primary-hover: #6366f1;
+      --takeaway-bg: linear-gradient(135deg, rgba(234, 179, 8, 0.16) 0%, rgba(202, 138, 4, 0.12) 100%);
+      --takeaway-border: rgba(250, 204, 21, 0.45);
+      --takeaway-text: #fde047;
+    }
+
+    /* Theme 3: Robotics Lab (Warm Blueprint / High-Contrast) */
+    [data-theme="blueprint"] {
+      --color-input: #10b981;
+      --color-input-bg: rgba(16, 185, 129, 0.18);
+      --color-input-border: #10b981;
+      --color-input-text: #a7f3d0;
+
+      --color-output: #3b82f6;
+      --color-output-bg: rgba(59, 130, 246, 0.2);
+      --color-output-border: #60a5fa;
+      --color-output-text: #bfdbfe;
+
+      --color-process: #334155;
+      --color-process-bg: rgba(30, 58, 138, 0.45);
+      --color-process-border: rgba(147, 197, 253, 0.35);
+      --color-process-text: #e0f2fe;
+
+      --bg-app: #0c1e3a;
+      --bg-gradient: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+                     radial-gradient(circle at 50% 0%, #173766 0%, #09172e 100%);
+      --bg-card: rgba(15, 36, 70, 0.88);
+      --bg-card-solid: #0f2446;
+      --bg-subtle: rgba(23, 52, 99, 0.85);
+      --text-main: #f0f9ff;
+      --text-muted: #bae6fd;
+      --border-subtle: rgba(56, 189, 248, 0.28);
+      --shadow-sm: 0 4px 16px rgba(2, 12, 27, 0.45);
+      --shadow-md: 0 16px 38px rgba(2, 12, 27, 0.6);
+      --shadow-lg: 0 24px 52px rgba(2, 12, 27, 0.75);
+      --accent-primary: #38bdf8;
+      --accent-primary-hover: #0284c7;
+      --takeaway-bg: rgba(250, 204, 21, 0.16);
+      --takeaway-border: rgba(250, 204, 21, 0.5);
+      --takeaway-text: #fef08a;
+    }
+
+    /* ==========================================================================
+       RESET & BASE TYPOGRAPHY
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-app);
+      background-image: var(--bg-gradient);
+      background-size: 28px 28px, 28px 28px, 100% 100%;
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 100vh;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    /* Ambient Aurora Orbs for Ultra-Modern Depth */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      filter: blur(95px);
+      opacity: 0.22;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    body::before {
+      top: -90px;
+      left: -80px;
+      background: var(--color-input);
+    }
+
+    body::after {
+      bottom: -100px;
+      right: -80px;
+      background: var(--color-output);
+      animation-delay: -7s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(45px, 35px) scale(1.15); }
+    }
+
+    /* ==========================================================================
+       HEADER, THEME SWITCHER & 3-STAGE PROGRESS BAR
+       ========================================================================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .lesson-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lesson-badge {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--color-input), var(--color-output));
+      padding: 5px 12px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+    }
+
+    .theme-switcher {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .theme-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 28px;
+    }
+
+    .theme-btn.active {
+      background: var(--bg-card-solid);
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    .sound-btn {
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sound-btn:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .stage-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stage-pill {
+      text-align: center;
+      font-size: 0.83rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stage-pill.active {
+      background: var(--accent-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    }
+
+    .stage-pill.done {
+      background: var(--color-input-bg);
+      color: var(--color-input-text);
+      border-color: var(--color-input-border);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-subtle);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-input), var(--accent-primary), var(--color-output));
+      border-radius: 999px;
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* ==========================================================================
+       MAIN CONTAINER & HERO CARDS
+       ========================================================================== */
+    .main-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 22px 16px 56px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-surface {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      animation: cardEntrance 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @media (max-width: 520px) {
+      .card-surface {
+        padding: 18px 14px;
+      }
+    }
+
+    @keyframes cardEntrance {
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .hero-banner-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.12) 50%, rgba(59, 130, 246, 0.12) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
+      background-size: 14px 14px;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .step-hero-text {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-hero-art {
+      width: 96px;
+      height: 96px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card-solid);
+      border-radius: 22px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 540px) {
+      .hero-banner-card {
+        flex-direction: column-reverse;
+        text-align: center;
+      }
+      .step-hero-art {
+        width: 84px;
+        height: 84px;
+      }
+    }
+
+    .step-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .step-counter {
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--accent-primary);
+    }
+
+    .explore-badge {
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 5px 13px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.25s ease;
+    }
+
+    .explore-badge.complete {
+      background: var(--color-input-bg);
+      color: var(--color-input-text);
+      border-color: var(--color-input-border);
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      line-height: 1.25;
+      margin-bottom: 6px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .step-intro {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       CUSTOM SVG ILLUSTRATIONS & ANIMATIONS
+       ========================================================================== */
+    .svg-icon {
+      width: 58px;
+      height: 58px;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.14));
+    }
+
+    .svg-icon-lg {
+      width: 84px;
+      height: 84px;
+      display: block;
+      filter: drop-shadow(0 6px 14px rgba(99, 102, 241, 0.25));
+    }
+
+    @keyframes pulseSignal {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes flowDash {
+      to { stroke-dashoffset: -24; }
+    }
+
+    .anim-pulse {
+      animation: pulseSignal 2.8s infinite ease-in-out;
+      transform-origin: center;
+    }
+
+    .anim-dash {
+      stroke-dasharray: 6 6;
+      animation: flowDash 1s linear infinite;
+    }
+
+    /* Confetti Particle Canvas */
+    #fx-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ==========================================================================
+       PHASE 1: INTERACTIVE EXPLORATION ELEMENTS
+       ========================================================================== */
+    .ipo-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 620px) {
+      .ipo-flow {
+        grid-template-columns: 1fr;
+      }
+      .flow-arrow {
+        transform: rotate(90deg);
+        margin: 0 auto;
+      }
+    }
+
+    .flow-arrow {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .node-btn {
+      min-height: 112px;
+      padding: 16px 12px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 1.02rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      position: relative;
+    }
+
+    .node-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .node-btn.type-input {
+      border-color: var(--color-input-border);
+      background: var(--color-input-bg);
+      color: var(--color-input-text);
+    }
+
+    .node-btn.type-process {
+      border-color: var(--color-process-border);
+      background: var(--color-process-bg);
+      color: var(--color-process-text);
+    }
+
+    .node-btn.type-output {
+      border-color: var(--color-output-border);
+      background: var(--color-output-bg);
+      color: var(--color-output-text);
+    }
+
+    .node-btn.selected {
+      box-shadow: 0 0 0 3px var(--accent-primary), var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .node-btn .check-dot {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* Tile Grid (Steps 2, 3, 4) */
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .tile-btn {
+      min-height: 122px;
+      padding: 16px 12px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      position: relative;
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .tile-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tile-btn.type-input.visited, .tile-btn.type-input.selected {
+      background: var(--color-input-bg);
+      border-color: var(--color-input);
+      color: var(--color-input-text);
+    }
+
+    .tile-btn.type-output.visited, .tile-btn.type-output.selected {
+      background: var(--color-output-bg);
+      border-color: var(--color-output);
+      color: var(--color-output-text);
+    }
+
+    .tile-btn.selected {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    .tile-status {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 0.85rem;
+    }
+
+    /* Info Reveal Panel */
+    .info-panel {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-left: 6px solid var(--accent-primary);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      min-height: 124px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.25s ease;
+    }
+
+    @media (max-width: 520px) {
+      .info-panel {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    .info-panel.type-input {
+      border-left-color: var(--color-input);
+      background: var(--color-input-bg);
+    }
+
+    .info-panel.type-output {
+      border-left-color: var(--color-output);
+      background: var(--color-output-bg);
+    }
+
+    .info-panel.type-process {
+      border-left-color: var(--color-process);
+      background: var(--color-process-bg);
+    }
+
+    .info-panel-visual {
+      width: 68px;
+      height: 68px;
+      border-radius: 16px;
+      background: var(--bg-card-solid);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .info-panel-content {
+      flex: 1;
+    }
+
+    .info-panel-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 520px) {
+      .info-panel-header {
+        justify-content: center;
+      }
+    }
+
+    .category-chip {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .chip-input {
+      background: var(--color-input);
+      color: #ffffff;
+    }
+
+    .chip-output {
+      background: var(--color-output);
+      color: #ffffff;
+    }
+
+    .chip-process {
+      background: var(--color-process);
+      color: #ffffff;
+    }
+
+    .info-panel-body {
+      font-size: 0.98rem;
+      color: var(--text-main);
+    }
+
+    .info-panel-note {
+      margin-top: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       STEP 5: LIVE CYBERPI HARDWARE SIMULATOR
+       ========================================================================== */
+    .sim-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 700px) {
+      .sim-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cyberpi-board {
+      background: linear-gradient(145deg, #1e293b 0%, #090d16 100%);
+      color: #f8fafc;
+      border-radius: 28px;
+      padding: 20px 18px;
+      border: 3px solid #334155;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.42), inset 0 2px 8px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+    }
+
+    /* Gold Edge Connector Pins at Bottom of Virtual CyberPi */
+    .cyberpi-board::after {
+      content: "";
+      width: 68%;
+      height: 8px;
+      border-radius: 4px;
+      background: repeating-linear-gradient(90deg, #eab308 0px, #eab308 6px, transparent 6px, transparent 10px);
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .board-brand-bar {
+      width: 100%;
+      max-width: 250px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+    }
+
+    .led-strip {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 250px;
+      padding: 9px 14px;
+      background: #090e1a;
+      border-radius: 999px;
+      border: 1px solid #334155;
+    }
+
+    .led-bulb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2px solid #334155;
+      transition: all 0.15s ease;
+    }
+
+    .led-bulb.on {
+      background: #60a5fa;
+      border-color: #bfdbfe;
+      box-shadow: 0 0 14px #3b82f6, 0 0 28px #60a5fa;
+    }
+
+    .led-bulb.joy-on {
+      background: #34d399;
+      border-color: #a7f3d0;
+      box-shadow: 0 0 14px #10b981, 0 0 28px #34d399;
+    }
+
+    .cyberpi-screen {
+      width: 100%;
+      max-width: 250px;
+      height: 132px;
+      background: #060911;
+      border: 3px solid #475569;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      text-align: center;
+      font-family: "Courier New", Courier, monospace;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 0 16px rgba(0,0,0,0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cyberpi-screen.active-screen {
+      background: radial-gradient(circle, #172554 0%, #09152e 100%);
+      border-color: var(--color-output);
+      box-shadow: 0 0 22px var(--color-output-glow);
+    }
+
+    .cyberpi-screen.joy-screen {
+      background: radial-gradient(circle, #064e3b 0%, #022c22 100%);
+      border-color: var(--color-input);
+      box-shadow: 0 0 22px var(--color-input-glow);
+    }
+
+    /* Live Audio Waveform Bars on Screen */
+    .wave-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 18px;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .cyberpi-screen.active-screen .wave-bars,
+    .cyberpi-screen.joy-screen .wave-bars {
+      opacity: 1;
+    }
+
+    .wave-bar {
+      width: 4px;
+      height: 6px;
+      background: #60a5fa;
+      border-radius: 2px;
+      animation: eqBounce 0.55s ease-in-out infinite alternate;
+    }
+
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.25s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.3s; }
+
+    @keyframes eqBounce {
+      0% { height: 4px; }
+      100% { height: 18px; }
+    }
+
+    .screen-emoji {
+      font-size: 2.1rem;
+      margin-bottom: 2px;
+    }
+
+    .screen-text {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+
+    .sim-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 250px;
+      gap: 10px;
+    }
+
+    .joystick-mock {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #090e1a;
+      border: 2px solid #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .joystick-mock:hover {
+      border-color: #10b981;
+    }
+
+    .joystick-stick {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #94a3b8, #475569);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .joystick-mock.tilted .joystick-stick {
+      transform: translateY(-6px);
+      background: radial-gradient(circle at 35% 35%, #6ee7b7, #10b981);
+    }
+
+    .btn-a-sim {
+      min-width: 112px;
+      min-height: 54px;
+      border-radius: 14px;
+      border: 2px solid #34d399;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      box-shadow: 0 5px 0 #065f46, 0 8px 16px rgba(16, 185, 129, 0.35);
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .btn-a-sim:active, .btn-a-sim.pressed {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #065f46;
+      background: #059669;
+    }
+
+    .btn-b-mock {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: #334155;
+      border: 2px solid #475569;
+      color: #94a3b8;
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sim-right-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ipo-live-indicators {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .live-pill {
+      padding: 10px 6px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .live-pill.lit-input {
+      background: var(--color-input);
+      border-color: var(--color-input);
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--color-input-glow);
+      transform: scale(1.03);
+    }
+
+    .live-pill.lit-process {
+      background: var(--color-process);
+      border-color: var(--color-process);
+      color: #ffffff;
+      transform: scale(1.03);
+    }
+
+    .live-pill.lit-output {
+      background: var(--color-output);
+      border-color: var(--color-output);
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--color-output-glow);
+      transform: scale(1.03);
+    }
+
+    .code-box {
+      background: #0b1120;
+      color: #cbd5e1;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      border: 1px solid #334155;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+    }
+
+    .code-line {
+      padding: 3px 8px;
+      border-radius: 6px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .code-line.hl-input {
+      background: rgba(16, 185, 129, 0.28);
+      color: #6ee7b7;
+      font-weight: 700;
+    }
+
+    .code-line.hl-process {
+      background: rgba(148, 163, 184, 0.25);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .code-line.hl-output {
+      background: rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
+    .sim-hint {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 700;
+      background: var(--bg-subtle);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ==========================================================================
+       KEY TAKEAWAY BANNER & NAVIGATION BUTTONS
+       ========================================================================== */
+    .takeaway-banner {
+      background: var(--takeaway-bg);
+      border: 1px solid var(--takeaway-border);
+      color: var(--takeaway-text);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      min-height: 50px;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      border: none;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-secondary {
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--border-subtle);
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: #ffffff;
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-primary-hover);
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================================================
+       PHASE 2: SWIPE & SORT GAME (With Stacked Card Deck Effect)
+       ========================================================================== */
+    .swipe-header-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-weight: 800;
+      font-size: 0.94rem;
+    }
+
+    .swipe-legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .legend-left {
+      color: var(--color-output-text);
+      background: var(--color-output-bg);
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--color-output-border);
+    }
+
+    .legend-right {
+      color: var(--color-input-text);
+      background: var(--color-input-bg);
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--color-input-border);
+    }
+
+    .swipe-stage {
+      position: relative;
+      height: 315px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      touch-action: pan-y;
+    }
+
+    .swipe-card-backdrop {
+      position: absolute;
+      width: 100%;
+      max-width: 330px;
+      height: 270px;
+      background: var(--bg-subtle);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      transform: translateY(10px) scale(0.95);
+      opacity: 0.65;
+      pointer-events: none;
+    }
+
+    .swipe-card {
+      width: 100%;
+      max-width: 350px;
+      height: 285px;
+      background: var(--bg-card-solid);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      cursor: grab;
+      user-select: none;
+      position: relative;
+      z-index: 2;
+      transition: transform 0.25s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .swipe-card:active {
+      cursor: grabbing;
+    }
+
+    .swipe-card.dragging {
+      transition: none;
+    }
+
+    .swipe-card.tint-input {
+      border-color: var(--color-input);
+      background: var(--color-input-bg);
+    }
+
+    .swipe-card.tint-output {
+      border-color: var(--color-output);
+      background: var(--color-output-bg);
+    }
+
+    .swipe-stamp {
+      position: absolute;
+      top: 14px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 0.88rem;
+      letter-spacing: 0.06em;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .stamp-input {
+      right: 14px;
+      border: 2px solid var(--color-input);
+      color: var(--color-input-text);
+      background: var(--bg-card-solid);
+    }
+
+    .stamp-output {
+      left: 14px;
+      border: 2px solid var(--color-output);
+      color: var(--color-output-text);
+      background: var(--bg-card-solid);
+    }
+
+    .swipe-visual-box {
+      width: 82px;
+      height: 82px;
+      border-radius: 20px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .swipe-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .swipe-clue {
+      font-size: 0.94rem;
+      color: var(--text-muted);
+    }
+
+    .swipe-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-sort-output {
+      min-height: 54px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 16px var(--color-output-glow);
+    }
+
+    .btn-sort-input {
+      min-height: 54px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 16px var(--color-input-glow);
+    }
+
+    .feedback-toast {
+      min-height: 68px;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .feedback-toast.correct {
+      background: var(--color-input-bg);
+      color: var(--color-input-text);
+      border-color: var(--color-input);
+    }
+
+    .feedback-toast.wrong {
+      background: rgba(239, 68, 68, 0.14);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    /* ==========================================================================
+       PHASE 3: 3D FLASHCARDS
+       ========================================================================== */
+    .flashcard-scene {
+      perspective: 1100px;
+      height: 295px;
+      margin: 16px auto 22px;
+      max-width: 420px;
+      cursor: pointer;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flashcard-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-card-solid);
+      padding: 26px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .flashcard-back {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-back.type-input {
+      border-color: var(--color-input);
+      background: linear-gradient(180deg, var(--color-input-bg) 0%, var(--bg-card-solid) 45%);
+    }
+
+    .flashcard-back.type-output {
+      border-color: var(--color-output);
+      background: linear-gradient(180deg, var(--color-output-bg) 0%, var(--bg-card-solid) 45%);
+    }
+
+    .tap-hint {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-primary);
+      background: var(--bg-subtle);
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    .flashcard-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       FINAL SUMMARY SCREEN
+       ========================================================================== */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .score-box {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .score-number {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--accent-primary);
+    }
+
+    .score-label {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .summary-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 12px 0 22px;
+    }
+
+    .summary-list li {
+      background: var(--bg-subtle);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--accent-primary);
+      font-size: 0.95rem;
+    }
+
+    .missed-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 18px;
+    }
+
+    .missed-pill {
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       STICKY HEADER WITH THEME SWITCHER, SOUND TOGGLE & 3-STAGE PROGRESS
+       ======================================================================== -->
+  <canvas id="fx-canvas"></canvas>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="lesson-title-row">
+        <div class="brand-group">
+          <span class="lesson-badge">CyberPi · Lesson 5</span>
+          <span id="header-progress-text" style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Step 1 of 5</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="sound-btn" id="btn-sound-toggle" aria-label="Toggle Sound Effects">🔊 SFX On</button>
+          <div class="theme-switcher" role="group" aria-label="Color Theme">
+            <button type="button" class="theme-btn active" data-theme-choice="light">☀️ Light</button>
+            <button type="button" class="theme-btn" data-theme-choice="dark">🌙 Dark</button>
+            <button type="button" class="theme-btn" data-theme-choice="blueprint">📐 Lab</button>
+          </div>
+        </div>
+      </div>
+      <div class="stage-pills">
+        <div id="pill-learn" class="stage-pill active">1. Learn</div>
+        <div id="pill-sort" class="stage-pill">2. Swipe &amp; Sort</div>
+        <div id="pill-flash" class="stage-pill">3. Flashcards</div>
+      </div>
+      <div class="progress-track">
+        <div id="global-progress-bar" class="progress-fill"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       DYNAMIC LESSON CONTAINER
+       ======================================================================== -->
+  <main class="main-container" id="app-root"></main>
+
+  <script>
+    /* ========================================================================
+       WEB AUDIO SYNTHESIZER & CONFETTI PARTICLE ENGINE (Zero External Files)
+       ======================================================================== */
+    const SoundFX = {
+      enabled: true,
+      ctx: null,
+      init() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      play(type) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          if (type === 'tap') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+            osc.start(now);
+            osc.stop(now + 0.09);
+          } else if (type === 'correct') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+            gain.gain.setValueAtTime(0.11, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+            osc.start(now);
+            osc.stop(now + 0.32);
+          } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.linearRampToValueAtTime(165, now + 0.22);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+            osc.start(now);
+            osc.stop(now + 0.24);
+          } else if (type === 'flip') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(340, now);
+            osc.frequency.exponentialRampToValueAtTime(490, now + 0.1);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+            osc.start(now);
+            osc.stop(now + 0.11);
+          } else if (type === 'sim') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+            osc.start(now);
+            osc.stop(now + 0.18);
+          }
+        } catch (e) { /* Ignore audio block if restricted */ }
+      }
+    };
+
+    const ConfettiFX = (() => {
+      const canvas = document.getElementById('fx-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let rafId = null;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function burst(count = 36) {
+        const colors = ['#10b981', '#3b82f6', '#6366f1', '#f59e0b', '#ec4899'];
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: canvas.width * 0.5 + (Math.random() - 0.5) * 140,
+            y: canvas.height * 0.45,
+            vx: (Math.random() - 0.5) * 11,
+            vy: -Math.random() * 10 - 3,
+            size: Math.random() * 7 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rot: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 12,
+            life: 1
+          });
+        }
+        if (!rafId) loop();
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.rot += p.vRot;
+          p.life -= 0.018;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+          ctx.restore();
+        });
+        particles = particles.filter(p => p.life > 0);
+        if (particles.length > 0) {
+          rafId = requestAnimationFrame(loop);
+        } else {
+          rafId = null;
+        }
+      }
+
+      return { burst };
+    })();
+
+    /* ========================================================================
+       HIGH-CRAFT 3D-SHADED SVG VECTOR ILLUSTRATIONS
+       ======================================================================== */
+    const SVG_ART = {
+      'node-input': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <defs>
+            <linearGradient id="gIn" x1="6" y1="14" x2="58" y2="50" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#34d399" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.12"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="14" width="52" height="36" rx="12" fill="url(#gIn)" stroke="#10b981" stroke-width="3"/>
+          <path class="anim-dash" d="M15 32H39" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+          <path d="M32 23L41 32L32 41" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="49" cy="32" r="4.5" fill="#10b981"/>
+        </svg>`,
+      'node-process': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="16" y="16" width="32" height="32" rx="9" fill="rgba(71,85,105,0.25)" stroke="#64748b" stroke-width="3"/>
+          <rect x="23" y="23" width="18" height="18" rx="5" fill="#475569"/>
+          <circle cx="32" cy="32" r="4" fill="#94a3b8"/>
+          <path d="M24 8V16M32 8V16M40 8V16M24 48V56M32 48V56M40 48V56M8 24H16M8 32H16M8 40H16M48 24H56M48 32H56M48 40H56" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+        </svg>`,
+      'node-output': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <defs>
+            <linearGradient id="gOut" x1="6" y1="14" x2="58" y2="50" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.12"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="14" width="52" height="36" rx="12" fill="url(#gOut)" stroke="#3b82f6" stroke-width="3"/>
+          <circle cx="15" cy="32" r="4.5" fill="#3b82f6"/>
+          <path class="anim-dash" d="M24 32H47" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+          <path d="M40 23L49 32L40 41" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`,
+      'button-a': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="11" y="13" width="42" height="42" rx="13" fill="rgba(16,185,129,0.22)" stroke="#10b981" stroke-width="3"/>
+          <circle cx="32" cy="35" r="14" fill="#047857"/>
+          <circle cx="32" cy="32" r="14" fill="#10b981"/>
+          <text x="32" y="38" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900" font-family="sans-serif">A</text>
+        </svg>`,
+      'button-b': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="11" y="13" width="42" height="42" rx="13" fill="rgba(16,185,129,0.22)" stroke="#10b981" stroke-width="3"/>
+          <circle cx="32" cy="35" r="14" fill="#047857"/>
+          <circle cx="32" cy="32" r="14" fill="#10b981"/>
+          <text x="32" y="38" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900" font-family="sans-serif">B</text>
+        </svg>`,
+      'joystick': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="34" r="22" fill="rgba(16,185,129,0.16)" stroke="#10b981" stroke-width="3"/>
+          <path d="M32 16V20M32 48V52M14 34H18M46 34H50" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="36" r="11" fill="#047857"/>
+          <circle cx="32" cy="33" r="11" fill="#10b981"/>
+          <circle cx="28" cy="29" r="3.5" fill="#a7f3d0"/>
+        </svg>`,
+      'microphone': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="24" y="9" width="16" height="29" rx="8" fill="#10b981"/>
+          <path d="M27 17H37M27 23H37M27 29H37" stroke="#064e3b" stroke-width="2" stroke-linecap="round"/>
+          <path d="M16 30C16 38.8 23.2 46 32 46C40.8 46 48 38.8 48 30" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M32 46V54M22 54H42" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>`,
+      'light-sensor': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="16" fill="rgba(16,185,129,0.2)"/>
+          <circle cx="32" cy="32" r="11" fill="#10b981"/>
+          <path d="M32 7V13M32 51V57M7 32H13M51 32H57M14.5 14.5L19 19M45 45L49.5 49.5M49.5 14.5L45 19M19 45L14.5 49.5" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>`,
+      'gyroscope': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <ellipse cx="32" cy="32" rx="23" ry="10" transform="rotate(-28 32 32)" stroke="#10b981" stroke-width="3"/>
+          <ellipse cx="32" cy="32" rx="23" ry="10" transform="rotate(28 32 32)" stroke="#10b981" stroke-width="3"/>
+          <circle cx="32" cy="32" r="7" fill="#10b981"/>
+          <circle cx="30" cy="30" r="2.2" fill="#d1fae5"/>
+        </svg>`,
+      'display': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="9" y="13" width="46" height="33" rx="8" fill="rgba(59,130,246,0.22)" stroke="#3b82f6" stroke-width="3"/>
+          <rect x="15" y="19" width="34" height="21" rx="4" fill="#2563eb"/>
+          <path d="M21 33L28 26L33 31L42 23" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="42" cy="23" r="2.5" fill="#93c5fd"/>
+          <path d="M24 52H40M32 46V52" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>`,
+      'rgb-leds': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <rect x="7" y="21" width="50" height="22" rx="11" fill="rgba(59,130,246,0.18)" stroke="#3b82f6" stroke-width="3"/>
+          <circle cx="16" cy="32" r="4.2" fill="#ef4444"/>
+          <circle cx="24" cy="32" r="4.2" fill="#f59e0b"/>
+          <circle cx="32" cy="32" r="4.2" fill="#10b981"/>
+          <circle cx="40" cy="32" r="4.2" fill="#3b82f6"/>
+          <circle cx="48" cy="32" r="4.2" fill="#a855f7"/>
+        </svg>`,
+      'speaker': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <path d="M13 24H23L36 14V50L23 40H13V24Z" fill="#3b82f6"/>
+          <path d="M42 23C45.5 26.5 45.5 37.5 42 41M48 17C54.5 23.5 54.5 40.5 48 47" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>`,
+      'motor-pins': `
+        <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="14" fill="rgba(59,130,246,0.22)" stroke="#3b82f6" stroke-width="3.5"/>
+          <circle cx="32" cy="32" r="5.5" fill="#3b82f6"/>
+          <path d="M32 10V17M32 47V54M10 32H17M47 32H54M16.5 16.5L21.5 21.5M42.5 42.5L47.5 47.5M47.5 16.5L42.5 21.5M21.5 42.5L16.5 47.5" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+        </svg>`,
+      'hero-board': `
+        <svg class="svg-icon-lg anim-pulse" viewBox="0 0 84 84" fill="none">
+          <defs>
+            <linearGradient id="boardGrad" x1="14" y1="8" x2="70" y2="76" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect x="14" y="8" width="56" height="68" rx="16" fill="url(#boardGrad)" stroke="#6366f1" stroke-width="3"/>
+          <rect x="20" y="14" width="44" height="8" rx="4" fill="#090e1a"/>
+          <circle cx="25" cy="18" r="2.3" fill="#ef4444"/>
+          <circle cx="33.5" cy="18" r="2.3" fill="#f59e0b"/>
+          <circle cx="42" cy="18" r="2.3" fill="#10b981"/>
+          <circle cx="50.5" cy="18" r="2.3" fill="#3b82f6"/>
+          <circle cx="59" cy="18" r="2.3" fill="#a855f7"/>
+          <rect x="21" y="26" width="42" height="24" rx="6" fill="#060911" stroke="#3b82f6" stroke-width="2"/>
+          <path d="M28 41L36 33L42 39L53 29" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="29" cy="61" r="6.5" fill="#1e293b" stroke="#10b981" stroke-width="2.2"/>
+          <rect x="44" y="55" width="8" height="11" rx="3" fill="#10b981"/>
+          <rect x="55" y="55" width="8" height="11" rx="3" fill="#10b981"/>
+        </svg>`
+    };
+
+    /* ========================================================================
+       LESSON DATA (Single Source of Truth across Phases 1, 2, and 3)
+       ======================================================================== */
+    const LESSON_ITEMS = [
+      // Inputs (6 items)
+      {
+        id: 'button-a',
+        name: 'Button A',
+        emoji: '🅰️',
+        category: 'INPUT',
+        group: 'buttons',
+        clue: 'A physical push-button on the front left of CyberPi that detects when you press it.',
+        detail: 'Detects a user press and sends a digital signal (Pressed or Not Pressed) into CyberPi’s brain.',
+        note: 'Used in programs like “When Button A is pressed, do an action.”'
+      },
+      {
+        id: 'button-b',
+        name: 'Button B',
+        emoji: '🅱️',
+        category: 'INPUT',
+        group: 'buttons',
+        clue: 'A physical push-button on the front right of CyberPi for user control.',
+        detail: 'Works alongside Button A so programs can trigger two different actions or stop an action.',
+        note: 'Often paired with Button A for start/stop or yes/no choices.'
+      },
+      {
+        id: 'joystick',
+        name: '5-Way Joystick',
+        emoji: '🕹️',
+        category: 'INPUT',
+        group: 'buttons',
+        clue: 'Moves Up, Down, Left, Right, and presses in the Center.',
+        detail: 'Reads 5 distinct directional inputs from your thumb so you can navigate menus or steer games.',
+        note: 'Counts as 5 separate directional switches in one controller.'
+      },
+      {
+        id: 'microphone',
+        name: 'Microphone',
+        emoji: '🎤',
+        category: 'INPUT',
+        group: 'sensors',
+        clue: 'Listens to your voice and measures how loud sounds are in the room.',
+        detail: 'Captures sound waves and converts loudness into numbers CyberPi can react to.',
+        note: 'Warning: Loud background noise in class can trigger sound thresholds early.'
+      },
+      {
+        id: 'light-sensor',
+        name: 'Light Sensor',
+        emoji: '☀️',
+        category: 'INPUT',
+        group: 'sensors',
+        clue: 'Measures how bright or dark the surrounding room is.',
+        detail: 'Detects ambient light intensity so CyberPi knows if lights turn on or a hand covers it.',
+        note: 'Values increase in bright light and drop in shadows.'
+      },
+      {
+        id: 'gyroscope',
+        name: 'Gyroscope & Accelerometer',
+        emoji: '🧭',
+        category: 'INPUT',
+        group: 'sensors',
+        clue: 'Senses tilting, shaking, rotation, and movement of the board.',
+        detail: 'Measures tilt angles and sudden shakes so you can control programs just by moving CyberPi.',
+        note: 'Great for step counters, tilt steering, and shake-to-shuffle apps.'
+      },
+      // Outputs (4 items)
+      {
+        id: 'display',
+        name: 'Full-Color Display',
+        emoji: '🖥️',
+        category: 'OUTPUT',
+        group: 'outputs',
+        clue: 'A small built-in color screen that shows text, numbers, icons, and charts.',
+        detail: 'Displays visual information from the microcontroller so the user can read messages or scores.',
+        note: 'Shows whatever the code tells it to draw or print.'
+      },
+      {
+        id: 'rgb-leds',
+        name: '5 RGB LEDs',
+        emoji: '🌈',
+        category: 'OUTPUT',
+        group: 'outputs',
+        clue: 'Five tiny multi-color lights lined up across CyberPi that glow in custom colors.',
+        detail: 'Each LED can shine red, green, blue, or mixed colors to give instant visual feedback.',
+        note: 'Can be controlled all together or one LED at a time.'
+      },
+      {
+        id: 'speaker',
+        name: 'Built-in Speaker',
+        emoji: '🔊',
+        category: 'OUTPUT',
+        group: 'outputs',
+        clue: 'Plays musical notes, beeps, sound effects, and recorded audio.',
+        detail: 'Turns digital audio signals from CyberPi into real sound waves you can hear.',
+        note: 'Keep volume moderate when testing in a shared classroom.'
+      },
+      {
+        id: 'motor-pins',
+        name: 'Motor & Pin Signals',
+        emoji: '⚙️',
+        category: 'OUTPUT',
+        group: 'outputs',
+        clue: 'Sends electrical control signals out to external motors and add-on parts.',
+        detail: 'Allows CyberPi to drive wheels, servos, or external lights when connected to a shield.',
+        note: 'External motors need proper power so CyberPi does not reset.'
+      }
+    ];
+
+    const PHASE1_STEPS = [
+      {
+        stepNum: 1,
+        title: 'How a Microcontroller Works',
+        intro: 'CyberPi is a microcontroller—a tiny computer on a single board. Every program it runs follows a simple three-part loop: Input, Process, and Output.',
+        takeaway: 'Key Takeaway: A microcontroller takes data in (Input), makes decisions with code (Process), and creates an action (Output).',
+        nodes: [
+          {
+            id: 'node-input',
+            label: 'INPUT',
+            type: 'input',
+            chip: 'INPUT',
+            heading: 'Input: Gathering Information',
+            body: 'Inputs send signals FROM the outside world INTO CyberPi. Buttons and sensors notice presses, sound, light, or tilt.',
+            note: 'Rule of thumb: Information goes INTO the board.'
+          },
+          {
+            id: 'node-process',
+            label: 'PROCESS',
+            type: 'process',
+            chip: 'PROCESS',
+            heading: 'Process: The Microcontroller Brain',
+            body: 'CyberPi’s processor reads the input signals and follows your code rules (like “if Button A is pressed, turn on LEDs”).',
+            note: 'Rule of thumb: Decisions happen INSIDE the chip.'
+          },
+          {
+            id: 'node-output',
+            label: 'OUTPUT',
+            type: 'output',
+            chip: 'OUTPUT',
+            heading: 'Output: Showing a Result',
+            body: 'Outputs send signals FROM CyberPi OUT to the user. Screens, lights, speakers, and motors let you see or hear the result.',
+            note: 'Rule of thumb: Actions come OUT of the board.'
+          }
+        ]
+      },
+      {
+        stepNum: 2,
+        title: 'User Controls (Physical Inputs)',
+        intro: 'Some inputs require you to touch or move them directly. Tap each control on CyberPi below to discover what signal it sends.',
+        takeaway: 'Key Takeaway: Buttons A, B, and the 5-way Joystick are manual inputs controlled directly by your fingers.',
+        itemIds: ['button-a', 'button-b', 'joystick']
+      },
+      {
+        stepNum: 3,
+        title: 'Built-in Sensors (Environment Inputs)',
+        intro: 'CyberPi also has sensors that measure the world around it automatically without being pressed. Tap each sensor to explore.',
+        takeaway: 'Key Takeaway: Sensors turn real-world conditions—sound, light, and motion—into numbers CyberPi can use.',
+        itemIds: ['microphone', 'light-sensor', 'gyroscope']
+      },
+      {
+        stepNum: 4,
+        title: 'CyberPi Outputs (Seeing, Hearing & Moving)',
+        intro: 'Once CyberPi processes an input, it uses outputs to communicate back to you. Tap every output component to see how it works.',
+        takeaway: 'Key Takeaway: Outputs display text, glow with color, play sound, or move external parts.',
+        itemIds: ['display', 'rgb-leds', 'speaker', 'motor-pins']
+      },
+      {
+        stepNum: 5,
+        title: 'Live Simulation: Input → Process → Output',
+        intro: 'Test a real CyberPi program! Press and hold Button A on the virtual board below and watch the Input, Process, Output indicators and live code respond.',
+        takeaway: 'Key Takeaway: Holding Button A (Input) triggers the if-else code (Process) to light the LEDs and screen (Output).'
+      }
+    ];
+
+    /* ========================================================================
+       APPLICATION STATE & THEME CONTROLLER
+       ======================================================================== */
+    const state = {
+      theme: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      phase: 'learn', // 'learn' | 'sort' | 'flash' | 'summary'
+      learnStepIndex: 0,
+      exploredByStep: {
+        0: new Set(),
+        1: new Set(),
+        2: new Set(),
+        3: new Set(),
+        4: new Set()
+      },
+      selectedItemByStep: {
+        0: null,
+        1: null,
+        2: null,
+        3: null
+      },
+      simPressed: false,
+
+      // Phase 2: Swipe & Sort
+      sortDeck: [],
+      sortIndex: 0,
+      sortScore: 0,
+      sortMissed: [],
+      sortLocked: false,
+
+      // Phase 3: Flashcards
+      flashDeck: [],
+      flashFlipped: false,
+      flashAgainCount: 0
+    };
+
+    const rootEl = document.getElementById('app-root');
+
+    function applyTheme(themeName) {
+      state.theme = themeName;
+      document.documentElement.setAttribute('data-theme', themeName);
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-theme-choice') === themeName);
+      });
+    }
+
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        SoundFX.play('tap');
+        applyTheme(btn.getAttribute('data-theme-choice'));
+      });
+    });
+
+    const soundBtn = document.getElementById('btn-sound-toggle');
+    if (soundBtn) {
+      soundBtn.addEventListener('click', () => {
+        SoundFX.enabled = !SoundFX.enabled;
+        soundBtn.textContent = SoundFX.enabled ? '🔊 SFX On' : '🔇 SFX Off';
+        if (SoundFX.enabled) SoundFX.play('tap');
+      });
+    }
+
+    /* ========================================================================
+       UTILITY FUNCTIONS
+       ======================================================================== */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function updateHeaderProgress() {
+      const pillLearn = document.getElementById('pill-learn');
+      const pillSort = document.getElementById('pill-sort');
+      const pillFlash = document.getElementById('pill-flash');
+      const bar = document.getElementById('global-progress-bar');
+      const text = document.getElementById('header-progress-text');
+
+      pillLearn.className = 'stage-pill';
+      pillSort.className = 'stage-pill';
+      pillFlash.className = 'stage-pill';
+
+      let pct = 0;
+
+      if (state.phase === 'learn') {
+        pillLearn.classList.add('active');
+        pct = ((state.learnStepIndex + 1) / 5) * 40;
+        text.textContent = `Learn · Step ${state.learnStepIndex + 1} of 5`;
+      } else if (state.phase === 'sort') {
+        pillLearn.classList.add('done');
+        pillSort.classList.add('active');
+        pct = 40 + (state.sortIndex / LESSON_ITEMS.length) * 35;
+        text.textContent = `Swipe & Sort · ${Math.min(state.sortIndex + 1, LESSON_ITEMS.length)} of ${LESSON_ITEMS.length}`;
+      } else if (state.phase === 'flash') {
+        pillLearn.classList.add('done');
+        pillSort.classList.add('done');
+        pillFlash.classList.add('active');
+        const doneCount = LESSON_ITEMS.length - state.flashDeck.length;
+        pct = 75 + (doneCount / LESSON_ITEMS.length) * 25;
+        text.textContent = `Flashcards · ${state.flashDeck.length} left`;
+      } else {
+        pillLearn.classList.add('done');
+        pillSort.classList.add('done');
+        pillFlash.classList.add('done');
+        pct = 100;
+        text.textContent = 'Lesson Complete!';
+      }
+
+      bar.style.width = `${Math.min(100, Math.round(pct))}%`;
+    }
+
+    /* ========================================================================
+       PHASE 1: INTERACTIVE LESSON RENDERER
+       ======================================================================== */
+    function renderLearnPhase() {
+      const stepIdx = state.learnStepIndex;
+      const step = PHASE1_STEPS[stepIdx];
+      const exploredSet = state.exploredByStep[stepIdx];
+
+      let requiredCount = 0;
+      if (stepIdx === 0) requiredCount = step.nodes.length;
+      else if (stepIdx < 4) requiredCount = step.itemIds.length;
+      else requiredCount = 1;
+
+      const exploredCount = exploredSet.size;
+      const isStepComplete = exploredCount >= requiredCount;
+
+      let interactiveHTML = '';
+
+      if (stepIdx === 0) {
+        const selectedId = state.selectedItemByStep[0];
+        const selectedNode = step.nodes.find(n => n.id === selectedId);
+
+        interactiveHTML = `
+          <div class="ipo-flow">
+            ${step.nodes.map((node, i) => `
+              <button type="button"
+                class="node-btn type-${node.type} ${selectedId === node.id ? 'selected' : ''}"
+                data-node-id="${node.id}">
+                <span class="check-dot">${exploredSet.has(node.id) ? '✅' : '👆'}</span>
+                ${SVG_ART[node.id]}
+                <span>${node.label}</span>
+              </button>
+              ${i < step.nodes.length - 1 ? '<div class="flow-arrow">➔</div>' : ''}
+            `).join('')}
+          </div>
+          <div class="info-panel ${selectedNode ? 'type-' + selectedNode.type : ''}">
+            ${selectedNode ? `
+              <div class="info-panel-visual">${SVG_ART[selectedNode.id]}</div>
+              <div class="info-panel-content">
+                <div class="info-panel-header">
+                  <span class="category-chip chip-${selectedNode.type}">${selectedNode.chip}</span>
+                  <span>${selectedNode.heading}</span>
+                </div>
+                <div class="info-panel-body">${selectedNode.body}</div>
+                <div class="info-panel-note">💡 ${selectedNode.note}</div>
+              </div>
+            ` : `
+              <div class="info-panel-body" style="width:100%; text-align:center; color:var(--text-muted);">
+                👆 Tap <strong>INPUT</strong>, <strong>PROCESS</strong>, and <strong>OUTPUT</strong> above to inspect each stage.
+              </div>
+            `}
+          </div>
+        `;
+      } else if (stepIdx >= 1 && stepIdx <= 3) {
+        const items = step.itemIds.map(id => LESSON_ITEMS.find(it => it.id === id));
+        const selectedId = state.selectedItemByStep[stepIdx];
+        const selectedItem = items.find(it => it.id === selectedId);
+        const typeClass = selectedItem ? selectedItem.category.toLowerCase() : '';
+
+        interactiveHTML = `
+          <div class="tile-grid">
+            ${items.map(item => {
+              const tClass = item.category.toLowerCase();
+              const visited = exploredSet.has(item.id);
+              const selected = selectedId === item.id;
+              return `
+                <button type="button"
+                  class="tile-btn type-${tClass} ${visited ? 'visited' : ''} ${selected ? 'selected' : ''}"
+                  data-item-id="${item.id}">
+                  <span class="tile-status">${visited ? '✅' : '👆'}</span>
+                  ${SVG_ART[item.id]}
+                  <span>${item.name}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="info-panel ${typeClass ? 'type-' + typeClass : ''}">
+            ${selectedItem ? `
+              <div class="info-panel-visual">${SVG_ART[selectedItem.id]}</div>
+              <div class="info-panel-content">
+                <div class="info-panel-header">
+                  <span class="category-chip chip-${typeClass}">${selectedItem.category}</span>
+                  <span>${selectedItem.name}</span>
+                </div>
+                <div class="info-panel-body">${selectedItem.detail}</div>
+                <div class="info-panel-note">📌 ${selectedItem.note}</div>
+              </div>
+            ` : `
+              <div class="info-panel-body" style="width:100%; text-align:center; color:var(--text-muted);">
+                👆 Tap any component tile above to reveal how it works on CyberPi.
+              </div>
+            `}
+          </div>
+        `;
+      } else {
+        interactiveHTML = `
+          <div class="sim-wrapper">
+            <div class="cyberpi-board">
+              <div class="board-brand-bar">
+                <span>CYBERPI STUDIO</span>
+                <span style="color:#10b981;">● ONLINE</span>
+              </div>
+              <div class="led-strip" id="sim-leds">
+                <div class="led-bulb"></div>
+                <div class="led-bulb"></div>
+                <div class="led-bulb"></div>
+                <div class="led-bulb"></div>
+                <div class="led-bulb"></div>
+              </div>
+              <div class="cyberpi-screen" id="sim-screen">
+                <div class="screen-emoji" id="sim-screen-emoji">😴</div>
+                <div class="screen-text" id="sim-screen-text">Waiting for Button A...</div>
+                <div class="wave-bars">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </div>
+              </div>
+              <div class="sim-controls-row">
+                <button type="button" class="joystick-mock" id="sim-joystick" title="Tap Joystick Up"><div class="joystick-stick"></div></button>
+                <button type="button" class="btn-a-sim" id="sim-btn-a">HOLD A</button>
+                <div class="btn-b-mock" title="Button B">B</div>
+              </div>
+            </div>
+
+            <div class="sim-right-panel">
+              <div>
+                <div style="font-size:0.8rem; font-weight:800; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Live Signal Flow</div>
+                <div class="ipo-live-indicators">
+                  <div class="live-pill" id="ind-input">🟢 INPUT<br><span style="font-weight:500;" id="ind-input-sub">Released</span></div>
+                  <div class="live-pill" id="ind-process">🧠 PROCESS<br><span style="font-weight:500;" id="ind-process-sub">Checking...</span></div>
+                  <div class="live-pill" id="ind-output">🔵 OUTPUT<br><span style="font-weight:500;" id="ind-output-sub">LEDs Off</span></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:0.8rem; font-weight:800; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">Live CyberPi Code</div>
+                <div class="code-box">
+                  <div class="code-line" id="code-1">forever:</div>
+                  <div class="code-line" id="code-2">&nbsp;&nbsp;if button_a.is_pressed():</div>
+                  <div class="code-line" id="code-3">&nbsp;&nbsp;&nbsp;&nbsp;leds.on("blue") &amp; screen("HI!")</div>
+                  <div class="code-line" id="code-4">&nbsp;&nbsp;else:</div>
+                  <div class="code-line" id="code-5">&nbsp;&nbsp;&nbsp;&nbsp;leds.off() &amp; screen("Waiting...")</div>
+                </div>
+              </div>
+
+              <div class="sim-hint" id="sim-status-hint">
+                ${isStepComplete ? '✅ Great job! You tested the Input → Process → Output loop.' : '👇 Press and hold the green Button A (or tap the Joystick) to unlock Next.'}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      rootEl.innerHTML = `
+        <section class="card-surface">
+          <div class="step-meta">
+            <span class="step-counter">STEP ${step.stepNum} OF 5</span>
+            <span class="explore-badge ${isStepComplete ? 'complete' : ''}">
+              ${isStepComplete ? `✅ Explored ${exploredCount}/${requiredCount}` : `Explore ${exploredCount}/${requiredCount}`}
+            </span>
+          </div>
+
+          <div class="hero-banner-card">
+            <div class="step-hero-text">
+              <h1>${step.title}</h1>
+              <p class="step-intro">${step.intro}</p>
+            </div>
+            <div class="step-hero-art">${SVG_ART['hero-board']}</div>
+          </div>
+
+          ${interactiveHTML}
+
+          <div class="takeaway-banner">
+            <span style="font-size:1.25rem;">⭐</span>
+            <span>${step.takeaway}</span>
+          </div>
+
+          <div class="nav-footer">
+            <button type="button" class="btn btn-secondary" id="btn-prev" ${stepIdx === 0 ? 'disabled' : ''}>
+              ← Back
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-next" ${!isStepComplete ? 'disabled' : ''}>
+              ${stepIdx === 4 ? 'Start Swipe & Sort →' : 'Next →'}
+            </button>
+          </div>
+        </section>
+      `;
+
+      if (stepIdx === 0) {
+        rootEl.querySelectorAll('[data-node-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            SoundFX.play('tap');
+            const id = btn.getAttribute('data-node-id');
+            state.exploredByStep[0].add(id);
+            state.selectedItemByStep[0] = id;
+            renderLearnPhase();
+          });
+        });
+      } else if (stepIdx >= 1 && stepIdx <= 3) {
+        rootEl.querySelectorAll('[data-item-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            SoundFX.play('tap');
+            const id = btn.getAttribute('data-item-id');
+            state.exploredByStep[stepIdx].add(id);
+            state.selectedItemByStep[stepIdx] = id;
+            renderLearnPhase();
+          });
+        });
+      } else {
+        bindSimulatorEvents();
+      }
+
+      const prevBtn = document.getElementById('btn-prev');
+      const nextBtn = document.getElementById('btn-next');
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (state.learnStepIndex > 0) {
+            SoundFX.play('tap');
+            state.learnStepIndex--;
+            updateHeaderProgress();
+            renderLearnPhase();
+          }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          SoundFX.play('tap');
+          if (state.learnStepIndex < 4) {
+            state.learnStepIndex++;
+            updateHeaderProgress();
+            renderLearnPhase();
+          } else {
+            startSortPhase();
+          }
+        });
+      }
+    }
+
+    /* ========================================================================
+       STEP 5 SIMULATOR LOGIC (Mouse + Touch Hold + Bonus Joystick Pulse)
+       ======================================================================== */
+    function bindSimulatorEvents() {
+      const btnA = document.getElementById('sim-btn-a');
+      const joyBtn = document.getElementById('sim-joystick');
+      if (!btnA) return;
+
+      const unlockStep5 = () => {
+        if (!state.exploredByStep[4].has('tested')) {
+          state.exploredByStep[4].add('tested');
+          const nextBtn = document.getElementById('btn-next');
+          const badge = document.querySelector('.explore-badge');
+          const hint = document.getElementById('sim-status-hint');
+          if (nextBtn) nextBtn.disabled = false;
+          if (badge) {
+            badge.classList.add('complete');
+            badge.textContent = '✅ Explored 1/1';
+          }
+          if (hint) {
+            hint.textContent = '✅ Great job! You tested the Input → Process → Output loop.';
+          }
+        }
+      };
+
+      const setSimActive = (isPressed) => {
+        state.simPressed = isPressed;
+        const leds = document.querySelectorAll('#sim-leds .led-bulb');
+        const screen = document.getElementById('sim-screen');
+        const screenEmoji = document.getElementById('sim-screen-emoji');
+        const screenText = document.getElementById('sim-screen-text');
+
+        const indInput = document.getElementById('ind-input');
+        const indInputSub = document.getElementById('ind-input-sub');
+        const indProcess = document.getElementById('ind-process');
+        const indProcessSub = document.getElementById('ind-process-sub');
+        const indOutput = document.getElementById('ind-output');
+        const indOutputSub = document.getElementById('ind-output-sub');
+
+        const c2 = document.getElementById('code-2');
+        const c3 = document.getElementById('code-3');
+        const c4 = document.getElementById('code-4');
+        const c5 = document.getElementById('code-5');
+
+        if (isPressed) {
+          SoundFX.play('sim');
+          btnA.classList.add('pressed');
+          leds.forEach(b => {
+            b.classList.remove('joy-on');
+            b.classList.add('on');
+          });
+          screen.classList.remove('joy-screen');
+          screen.classList.add('active-screen');
+          screenEmoji.textContent = '🚀';
+          screenText.textContent = 'HI! Button A Active';
+
+          indInput.className = 'live-pill lit-input';
+          indInputSub.textContent = 'Pressed (1)';
+          indProcess.className = 'live-pill lit-process';
+          indProcessSub.textContent = 'If = True';
+          indOutput.className = 'live-pill lit-output';
+          indOutputSub.textContent = 'LEDs + Screen';
+
+          c2.className = 'code-line hl-input';
+          c3.className = 'code-line hl-output';
+          c4.className = 'code-line';
+          c5.className = 'code-line';
+
+          unlockStep5();
+        } else {
+          btnA.classList.remove('pressed');
+          leds.forEach(b => b.classList.remove('on', 'joy-on'));
+          screen.classList.remove('active-screen', 'joy-screen');
+          screenEmoji.textContent = '😴';
+          screenText.textContent = 'Waiting for Button A...';
+
+          indInput.className = 'live-pill';
+          indInputSub.textContent = 'Released (0)';
+          indProcess.className = 'live-pill lit-process';
+          indProcessSub.textContent = 'Else Branch';
+          indOutput.className = 'live-pill';
+          indOutputSub.textContent = 'LEDs Off';
+
+          c2.className = 'code-line';
+          c3.className = 'code-line';
+          c4.className = 'code-line hl-process';
+          c5.className = 'code-line hl-output';
+        }
+      };
+
+      setSimActive(false);
+
+      btnA.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        btnA.setPointerCapture(e.pointerId);
+        setSimActive(true);
+      });
+
+      const releaseHandler = () => setSimActive(false);
+      btnA.addEventListener('pointerup', releaseHandler);
+      btnA.addEventListener('pointercancel', releaseHandler);
+
+      if (joyBtn) {
+        joyBtn.addEventListener('click', () => {
+          SoundFX.play('sim');
+          joyBtn.classList.add('tilted');
+          const leds = document.querySelectorAll('#sim-leds .led-bulb');
+          const screen = document.getElementById('sim-screen');
+          const screenEmoji = document.getElementById('sim-screen-emoji');
+          const screenText = document.getElementById('sim-screen-text');
+          const indInput = document.getElementById('ind-input');
+          const indInputSub = document.getElementById('ind-input-sub');
+          const indOutput = document.getElementById('ind-output');
+          const indOutputSub = document.getElementById('ind-output-sub');
+
+          leds.forEach(b => b.classList.add('joy-on'));
+          screen.classList.add('joy-screen');
+          screenEmoji.textContent = '🕹️';
+          screenText.textContent = 'Joystick: UP!';
+          indInput.className = 'live-pill lit-input';
+          indInputSub.textContent = 'Joy UP (1)';
+          indOutput.className = 'live-pill lit-output';
+          indOutputSub.textContent = 'Green LEDs';
+          unlockStep5();
+
+          setTimeout(() => {
+            joyBtn.classList.remove('tilted');
+            if (!state.simPressed) setSimActive(false);
+          }, 950);
+        });
+      }
+    }
+
+    /* ========================================================================
+       PHASE 2: SWIPE & SORT GAME
+       ======================================================================== */
+    function startSortPhase() {
+      state.phase = 'sort';
+      state.sortDeck = shuffleArray(LESSON_ITEMS);
+      state.sortIndex = 0;
+      state.sortScore = 0;
+      state.sortMissed = [];
+      state.sortLocked = false;
+      updateHeaderProgress();
+      renderSortPhase();
+    }
+
+    function renderSortPhase() {
+      const currentItem = state.sortDeck[state.sortIndex];
+      const hasNextCard = state.sortIndex + 1 < state.sortDeck.length;
+
+      rootEl.innerHTML = `
+        <section class="card-surface">
+          <div class="swipe-header-stats">
+            <span>Card ${state.sortIndex + 1} of ${state.sortDeck.length}</span>
+            <span>Score: ${state.sortScore}</span>
+          </div>
+
+          <div class="swipe-legend">
+            <span class="legend-left">⬅️ Swipe Left: OUTPUT</span>
+            <span class="legend-right">Swipe Right: INPUT ➡️</span>
+          </div>
+
+          <div class="swipe-stage" id="swipe-stage">
+            ${hasNextCard ? '<div class="swipe-card-backdrop"></div>' : ''}
+            <div class="swipe-card" id="swipe-card">
+              <span class="swipe-stamp stamp-output" id="stamp-output">OUTPUT</span>
+              <span class="swipe-stamp stamp-input" id="stamp-input">INPUT</span>
+              <div class="swipe-visual-box">${SVG_ART[currentItem.id]}</div>
+              <div class="swipe-title">${currentItem.name}</div>
+              <div class="swipe-clue">${currentItem.clue}</div>
+            </div>
+          </div>
+
+          <div class="feedback-toast" id="sort-feedback">
+            Drag the card or tap a button below to sort it!
+          </div>
+
+          <div class="swipe-buttons">
+            <button type="button" class="btn-sort-output" id="btn-choose-output">⬅️ OUTPUT</button>
+            <button type="button" class="btn-sort-input" id="btn-choose-input">INPUT ➡️</button>
+          </div>
+        </section>
+      `;
+
+      const card = document.getElementById('swipe-card');
+      const stampInput = document.getElementById('stamp-input');
+      const stampOutput = document.getElementById('stamp-output');
+      const btnOut = document.getElementById('btn-choose-output');
+      const btnIn = document.getElementById('btn-choose-input');
+
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+
+      const handleChoice = (chosenCategory) => {
+        if (state.sortLocked) return;
+        state.sortLocked = true;
+        btnOut.disabled = true;
+        btnIn.disabled = true;
+
+        const isCorrect = chosenCategory === currentItem.category;
+        const feedbackEl = document.getElementById('sort-feedback');
+
+        const flyX = chosenCategory === 'INPUT' ? 340 : -340;
+        card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        card.style.transform = `translateX(${flyX}px) rotate(${chosenCategory === 'INPUT' ? 16 : -16}deg)`;
+        card.style.opacity = '0';
+
+        if (isCorrect) {
+          SoundFX.play('correct');
+          ConfettiFX.burst(24);
+          state.sortScore++;
+          feedbackEl.className = 'feedback-toast correct';
+          feedbackEl.textContent = `✅ Spot on! ${currentItem.name} is an ${currentItem.category}.`;
+        } else {
+          SoundFX.play('wrong');
+          state.sortMissed.push(currentItem);
+          feedbackEl.className = 'feedback-toast wrong';
+          const reason = currentItem.category === 'INPUT'
+            ? 'It sends information INTO CyberPi.'
+            : 'It sends a result OUT from CyberPi.';
+          feedbackEl.textContent = `❌ Actually, ${currentItem.name} is an ${currentItem.category}. ${reason}`;
+        }
+
+        const delay = isCorrect ? 1050 : 2300;
+        setTimeout(() => {
+          state.sortIndex++;
+          state.sortLocked = false;
+          if (state.sortIndex < state.sortDeck.length) {
+            updateHeaderProgress();
+            renderSortPhase();
+          } else {
+            startFlashPhase();
+          }
+        }, delay);
+      };
+
+      card.addEventListener('pointerdown', (e) => {
+        if (state.sortLocked) return;
+        isDragging = true;
+        startX = e.clientX;
+        card.classList.add('dragging');
+        card.setPointerCapture(e.pointerId);
+      });
+
+      card.addEventListener('pointermove', (e) => {
+        if (!isDragging || state.sortLocked) return;
+        currentX = e.clientX - startX;
+        const rotate = currentX * 0.06;
+        card.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
+
+        if (currentX > 25) {
+          card.classList.add('tint-input');
+          card.classList.remove('tint-output');
+          stampInput.style.opacity = Math.min(1, currentX / 90);
+          stampOutput.style.opacity = 0;
+        } else if (currentX < -25) {
+          card.classList.add('tint-output');
+          card.classList.remove('tint-input');
+          stampOutput.style.opacity = Math.min(1, Math.abs(currentX) / 90);
+          stampInput.style.opacity = 0;
+        } else {
+          card.classList.remove('tint-input', 'tint-output');
+          stampInput.style.opacity = 0;
+          stampOutput.style.opacity = 0;
+        }
+      });
+
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        card.classList.remove('dragging');
+
+        if (currentX > 85) {
+          handleChoice('INPUT');
+        } else if (currentX < -85) {
+          handleChoice('OUTPUT');
+        } else {
+          card.style.transform = '';
+          card.classList.remove('tint-input', 'tint-output');
+          stampInput.style.opacity = 0;
+          stampOutput.style.opacity = 0;
+        }
+        currentX = 0;
+      };
+
+      card.addEventListener('pointerup', endDrag);
+      card.addEventListener('pointercancel', endDrag);
+
+      btnOut.addEventListener('click', () => handleChoice('OUTPUT'));
+      btnIn.addEventListener('click', () => handleChoice('INPUT'));
+    }
+
+    /* ========================================================================
+       PHASE 3: 3D FLASHCARDS
+       ======================================================================== */
+    function startFlashPhase() {
+      state.phase = 'flash';
+      state.flashDeck = shuffleArray(LESSON_ITEMS);
+      state.flashFlipped = false;
+      state.flashAgainCount = 0;
+      updateHeaderProgress();
+      renderFlashPhase();
+    }
+
+    function renderFlashPhase() {
+      if (state.flashDeck.length === 0) {
+        renderSummaryScreen();
+        return;
+      }
+
+      const card = state.flashDeck[0];
+      const typeClass = card.category.toLowerCase();
+
+      rootEl.innerHTML = `
+        <section class="card-surface">
+          <div class="swipe-header-stats">
+            <span>Flashcard Review</span>
+            <span>Cards Remaining: ${state.flashDeck.length}</span>
+          </div>
+
+          <div class="flashcard-scene" id="flash-scene">
+            <div class="flashcard-inner ${state.flashFlipped ? 'is-flipped' : ''}" id="flash-inner">
+              <!-- Front -->
+              <div class="flashcard-face flashcard-front">
+                <span class="tap-hint">What am I? (Tap card to flip)</span>
+                <p style="font-size:1.12rem; font-weight:700; line-height:1.45;">
+                  “${card.clue}”
+                </p>
+              </div>
+              <!-- Back -->
+              <div class="flashcard-face flashcard-back type-${typeClass}">
+                <span class="category-chip chip-${typeClass}" style="margin-bottom:12px;">${card.category}</span>
+                <div class="swipe-visual-box" style="margin-bottom:10px;">${SVG_ART[card.id]}</div>
+                <div style="font-size:1.35rem; font-weight:800;">${card.name}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flashcard-actions">
+            <button type="button" class="btn btn-secondary" id="btn-flash-again">
+              🔄 Again
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-flash-gotit">
+              ✅ Got it
+            </button>
+          </div>
+        </section>
+      `;
+
+      const scene = document.getElementById('flash-scene');
+      const inner = document.getElementById('flash-inner');
+
+      scene.addEventListener('click', () => {
+        SoundFX.play('flip');
+        state.flashFlipped = !state.flashFlipped;
+        inner.classList.toggle('is-flipped', state.flashFlipped);
+      });
+
+      document.getElementById('btn-flash-again').addEventListener('click', () => {
+        SoundFX.play('tap');
+        const missedCard = state.flashDeck.shift();
+        state.flashDeck.push(missedCard);
+        state.flashAgainCount++;
+        state.flashFlipped = false;
+        updateHeaderProgress();
+        renderFlashPhase();
+      });
+
+      document.getElementById('btn-flash-gotit').addEventListener('click', () => {
+        SoundFX.play('correct');
+        state.flashDeck.shift();
+        state.flashFlipped = false;
+        updateHeaderProgress();
+        renderFlashPhase();
+      });
+    }
+
+    /* ========================================================================
+       FINAL SCREEN
+       ======================================================================== */
+    function renderSummaryScreen() {
+      state.phase = 'summary';
+      updateHeaderProgress();
+      SoundFX.play('correct');
+      ConfettiFX.burst(60);
+
+      const missedHTML = state.sortMissed.length === 0
+        ? `<p style="color:var(--color-input-text); font-weight:800;">🌟 Zero missed cards in Swipe &amp; Sort! Perfect score!</p>`
+        : `
+          <div class="missed-pills">
+            ${state.sortMissed.map(item => `
+              <span class="missed-pill" style="
+                background: var(--color-${item.category.toLowerCase()}-bg);
+                color: var(--color-${item.category.toLowerCase()}-text);
+                border: 1px solid var(--color-${item.category.toLowerCase()}-border);
+              ">
+                ${item.emoji} ${item.name} (${item.category})
+              </span>
+            `).join('')}
+          </div>
+        `;
+
+      rootEl.innerHTML = `
+        <section class="card-surface">
+          <div class="hero-banner-card">
+            <div class="step-hero-text">
+              <h1>🎉 Lesson Complete!</h1>
+              <p class="step-intro">You explored CyberPi’s inputs, outputs, and live microcontroller loop.</p>
+            </div>
+            <div class="step-hero-art">${SVG_ART['hero-board']}</div>
+          </div>
+
+          <div class="score-grid">
+            <div class="score-box">
+              <div class="score-number">${state.sortScore} / ${LESSON_ITEMS.length}</div>
+              <div class="score-label">Swipe &amp; Sort Score</div>
+            </div>
+            <div class="score-box">
+              <div class="score-number">${state.flashAgainCount}</div>
+              <div class="score-label">Flashcards Retried</div>
+            </div>
+          </div>
+
+          <h3 style="font-size:1rem; margin-bottom:6px;">Items to Review from Swipe &amp; Sort:</h3>
+          ${missedHTML}
+
+          <h3 style="font-size:1rem; margin-top:14px;">Main Lesson Takeaways:</h3>
+          <ul class="summary-list">
+            ${PHASE1_STEPS.map(s => `<li>⭐ ${s.takeaway.replace('Key Takeaway: ', '')}</li>`).join('')}
+          </ul>
+
+          <button type="button" class="btn btn-primary" style="width:100%;" id="btn-restart">
+            🔁 Start Again
+          </button>
+        </section>
+      `;
+
+      document.getElementById('btn-restart').addEventListener('click', () => {
+        state.phase = 'learn';
+        state.learnStepIndex = 0;
+        state.exploredByStep = { 0: new Set(), 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set() };
+        state.selectedItemByStep = { 0: null, 1: null, 2: null, 3: null };
+        state.sortDeck = [];
+        state.sortIndex = 0;
+        state.sortScore = 0;
+        state.sortMissed = [];
+        state.flashDeck = [];
+        state.flashFlipped = false;
+        state.flashAgainCount = 0;
+        updateHeaderProgress();
+        renderLearnPhase();
+      });
+    }
+
+    /* ========================================================================
+       BOOT LESSON
+       ======================================================================== */
+    applyTheme(state.theme);
+    updateHeaderProgress();
+    renderLearnPhase();
+  </script>
+</body>
+</html>
